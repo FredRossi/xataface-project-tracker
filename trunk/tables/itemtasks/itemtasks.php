@@ -41,6 +41,14 @@ class tables_ItemTasks {
 		 return null;
 	}
 	
+	function acc_status__permissions(&$record){
+		 $employee = Security::getLoggedInEmployee();
+		 if ($record && $record->val('assigned_acc')==$employee['id'] && Security::hasPermission('update_acc_status')) 
+			return array('edit'=>1);	
+		 if (!Security::hasPermission('item_administration') ) return array('edit'=>0);
+		 return null;
+	}
+	
 	function dev_hours_spent__permissions(&$record){
 		 $employee = Security::getLoggedInEmployee();
 		 if ($record && $record->val('assigned_dev')==$employee['id'] && Security::hasPermission('update_dev_status')) 
@@ -56,9 +64,19 @@ class tables_ItemTasks {
 		 if (!Security::hasPermission('item_administration') ) return array('edit'=>0);
 		 return null;
 	}
-		
+	
 	function getPermissions(&$record){	 	
-         return Security::getPermissions();
+		 $permissions = Security::getPermissions();
+		 if ($record){
+			 $parent = $record->getRelatedRecords('item',false);
+			 if (	$parent 
+					&& $parent['item_status'] == 7
+					&&  !Security::hasPermission('item_administration')	
+			 ){
+				$permissions['edit']=0;
+			 }
+		 }
+         return $permissions;
     }
 	
 }

@@ -20,10 +20,8 @@ class conf_ApplicationDelegate {
 					case 'iterations':
 						throw new Exception("Use default rendering");
 				}
-			}			
-			// Non-admin users can't see any other table.
-			return null;
-	 
+			}
+			
 		} else{
 			//Admin users can see everything..
 			throw new Exception("Use default rendering");
@@ -42,6 +40,52 @@ class conf_ApplicationDelegate {
             $query['-cursor'] = 0;
         }		
     }
+	
+	
+	static public $reportMenu = array(
+		  array(
+			'href'=>'index.php?-action=list&-table=items&-edit=1&itemtasks/dev_status=17',
+			'label'=>'Development Complete Items'
+		),array(
+			'href'=>'index.php?-action=list&-table=items&-edit=1&itemtasks/qa_status=24',
+			'label'=>'QA Complete Items'
+		),array(
+			'href'=>'index.php?-action=list&-table=items&-edit=1&itemtasks/assigned_dev==',
+			'label'=>'Unassigned Dev Items'
+		),array(
+			'href'=>'index.php?-action=list&-table=items&-edit=1&item_status=2',
+			'label'=>'Items in Progress'
+		),array(
+			'href'=>'index.php?-action=list&-table=items&-edit=1&item_status=7',
+			'label'=>'Completed Items'
+		),array(
+			'href'=>'index.php?-action=list&-table=EfficiencyByDeveloperAndIteration',
+			'label'=>'Efficiency By Developer And Iteration'
+		)
+	);
+	
+	
+	function block__after_nav_menu()
+    {
+		if (Security::isUserRole('Portfolio Manager') || Security::isUserRole('Administrator')){
+			conf_ApplicationDelegate::printPortlet('reports', conf_ApplicationDelegate::$reportMenu);
+		}		
+    }
+	
+	function printPortlet($portletName, $portletItems){		 
+		 printf('<div class="portlet"><div><h5>'.$portletName.'</h5><div class="portletBody">');		 
+		 foreach ($portletItems as $item){
+			 printf( "<div class='portletContent'><a href='"
+						.$item['href']
+						."' class='navItem'><img src='"
+						.$ENV.DATAFACE_URL
+						."/images/document_icon.gif' class='navIconRoot'/>"
+						.'<span class="navItemText">'
+						.$item['label']
+						."</span></a></div>" );
+		 }
+         printf('</div>');
+	}
 }
 
 class Security{
