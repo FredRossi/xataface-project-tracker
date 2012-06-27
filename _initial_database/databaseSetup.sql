@@ -192,30 +192,44 @@ CREATE TABLE IF NOT EXISTS ItemTasks
 	FOREIGN KEY (assigned_qa) REFERENCES Employees(id)
 );
 
-CREATE TABLE IF NOT EXISTS MailingLists
-(
-  id INT NOT NULL UNIQUE AUTO_INCREMENT,
-  name VARCHAR(50),
-  PRIMARY KEY (id) 
-);
+#CREATE TABLE IF NOT EXISTS MailingLists
+#(
+#  id INT NOT NULL UNIQUE AUTO_INCREMENT,
+#  name VARCHAR(50),
+#  PRIMARY KEY (id) 
+#);
 
-CREATE TABLE IF NOT EXISTS MailingListMembers
-(
-  id INT NOT NULL UNIQUE AUTO_INCREMENT,  
-  employee INT,
-  mailing_list INT,
-  PRIMARY KEY (id),
-  FOREIGN KEY (mailing_list) REFERENCES MailingLists(id),
-  FOREIGN KEY (employee) REFERENCES Employees(id)
-);
+#CREATE TABLE IF NOT EXISTS MailingListMembers
+#(
+#  id INT NOT NULL UNIQUE AUTO_INCREMENT,  
+#  employee INT,
+#  mailing_list INT,
+#  PRIMARY KEY (id),
+#  FOREIGN KEY (mailing_list) REFERENCES MailingLists(id),
+#  FOREIGN KEY (employee) REFERENCES Employees(id)
+#);
 
-CREATE VIEW DevCompleteItems AS SELECT * FROM items INNER JOIN itemtasks ON items.id = itemtasks.item WHERE dev_status = (SELECT id FROM devstatustypes WHERE name='Complete' );
-CREATE VIEW QACompleteItems AS SELECT * FROM items INNER JOIN itemtasks ON items.id = itemtasks.item WHERE qa_status = (SELECT id FROM qastatustypes WHERE name='Complete' );
-CREATE VIEW CompletedItems AS SELECT * FROM items WHERE item_status = (SELECT id FROM itemstatustypes WHERE name='Complete' );
+#CREATE VIEW DevCompleteItems AS SELECT items.* FROM items INNER JOIN itemtasks ON items.id = itemtasks.item WHERE dev_status = (SELECT id FROM devstatustypes WHERE name='Complete' );
+#CREATE VIEW QACompleteItems AS SELECT items.* FROM items INNER JOIN itemtasks ON items.id = itemtasks.item WHERE qa_status = (SELECT id FROM qastatustypes WHERE name='Complete' );
+#CREATE VIEW CompletedItems AS SELECT items.* FROM items WHERE item_status = (SELECT id FROM itemstatustypes WHERE name='Complete' );
 #CREATE VIEW UnassignedItems AS SELECT id, name, description FROM LookupTable WHERE lookup_type = 1;
 #CREATE VIEW ItemsCompleted AS SELECT id, name, description FROM LookupTable WHERE lookup_type = 1;
 #CREATE VIEW ItemsInQA AS SELECT id, name, description FROM LookupTable WHERE lookup_type = 1;
-#CREATE VIEW EfficiencyByDeveloper AS SELECT id, name, description FROM LookupTable WHERE lookup_type = 1;
+
+#DROP VIEW EfficiencyByDeveloperAndIteration;
+#CREATE VIEW EfficiencyByDeveloperAndIteration AS SELECT 
+#        @rownum:=@rownum+1 'id',
+#        itemtasks.assigned_dev AS Resource, 
+#        SUM(dev_hours_spent) AS HoursSpent, 
+#        SUM(estimated_dev_hours) AS EstimatedHours, 
+#        (SUM(dev_hours_spent)/SUM(estimated_dev_hours)) AS Efficiency,
+#        items.iteration AS Iteration
+#        FROM itemtasks 
+#        INNER JOIN items ON items.id = itemtasks.item
+#        
+#        GROUP BY assigned_dev, items.iteration 
+#        ;
+        
 #CREATE VIEW EfficiencyByQA AS SELECT id, name, description FROM LookupTable WHERE lookup_type = 1;
 #CREATE VIEW EfficiencyByResource AS SELECT id, name, description FROM LookupTable WHERE lookup_type = 1;
 

@@ -76,8 +76,13 @@ class tables_Items {
 		 return null;
 	}
 	
-	function getPermissions(&$record){	 	
-         return Security::getPermissions();
+	function getPermissions(&$record){		
+		 $permissions = Security::getPermissions();
+		 if ( $record 
+			&& $record->val('item_status')==7 
+			&&  !Security::hasPermission('item_administration'))  
+			$permissions['edit']=0;
+         return $permissions;
     }
 	
 }
