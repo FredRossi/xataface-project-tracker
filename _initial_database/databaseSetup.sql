@@ -104,6 +104,15 @@ CREATE TABLE IF NOT EXISTS Employees
     firstname VARCHAR(50),
     lastname VARCHAR(50),
     email VARCHAR(150),
+    personal_email VARCHAR(150),
+    local_no VARCHAR(6),
+    mobile_no VARCHAR(50),
+    phone_no VARCHAR(12),
+    street_address VARCHAR(150),
+    city VARCHAR(50),
+    skype_id VARCHAR(50),
+    yahoo_id VARCHAR(50),
+    domain_id VARCHAR(50),
     department INT,	
     PRIMARY KEY (id),
     FOREIGN KEY (department) REFERENCES LOOKUPTABLE(id)
@@ -217,18 +226,54 @@ CREATE TABLE IF NOT EXISTS ItemTasks
 #CREATE VIEW ItemsInQA AS SELECT id, name, description FROM LookupTable WHERE lookup_type = 1;
 
 #DROP VIEW EfficiencyByDeveloperAndIteration;
-#CREATE VIEW EfficiencyByDeveloperAndIteration AS SELECT 
-#        @rownum:=@rownum+1 'id',
-#        itemtasks.assigned_dev AS Resource, 
-#        SUM(dev_hours_spent) AS HoursSpent, 
-#        SUM(estimated_dev_hours) AS EstimatedHours, 
-#        (SUM(dev_hours_spent)/SUM(estimated_dev_hours)) AS Efficiency,
-#        items.iteration AS Iteration
-#        FROM itemtasks 
-#        INNER JOIN items ON items.id = itemtasks.item
-#        
-#        GROUP BY assigned_dev, items.iteration 
-#        ;
+CREATE VIEW EfficiencyByDeveloperAndIteration AS
+    SELECT
+        concat_ws('',itemtasks.assigned_dev, ':',  items.iteration) AS id,
+        (SELECT concat_ws('',e.lastname,', ',e.firstname) FROM employees AS e WHERE id = itemtasks.assigned_dev) AS employee, 
+        (SELECT department FROM employees e WHERE e.id = itemtasks.assigned_dev) AS department, 
+        items.iteration AS Iteration,
+        SUM(dev_hours_spent) AS HoursSpent, 
+        SUM(estimated_dev_hours) AS EstimatedHours, 
+        (SUM(estimated_dev_hours)/SUM(dev_hours_spent)) AS Efficiency        
+        FROM itemtasks as itemtasks        
+        INNER JOIN items ON items.id = itemtasks.item        
+        WHERE itemtasks.dev_status = (SELECT id FROM DevStatusTypes WHERE name='Complete')
+        GROUP BY assigned_dev, items.iteration ;
+        
+#DROP VIEW GMCMigrationJobStatus;
+CREATE VIEW GMCMigrationJobStatus AS
+SELECT
+        items.item_status AS id,        
+        (SELECT name FROM ItemStatusTypes WHERE id = items.item_status) AS itemstatus,
+        items.portfolio,        
+        count(id) as count        
+        FROM items
+        WHERE items.portfolio = (SELECT id FROM portfolios WHERE name='Migration')
+            AND NOT items.item_status = (SELECT id FROM ItemStatusTypes WHERE name='Complete')
+        GROUP BY items.item_status ;
+        
+#DROP VIEW PortfolioJobAllocation;      
+CREATE VIEW PortfolioJobAllocation AS
+SELECT
+        portfolio AS id,        
+        items.portfolio,
+        count(id) as count
+        FROM items
+        WHERE NOT items.item_status = (SELECT id FROM ItemStatusTypes WHERE name='Complete')
+        GROUP BY items.portfolio;
+        
+#DROP VIEW CompletedItemsCountByClient;
+CREATE VIEW CompletedItemsCountByClient AS
+SELECT
+        items.client_name AS id,        
+        items.client_name,
+        items.portfolio,
+        count(id) as count        
+        FROM items
+        WHERE items.item_status = (SELECT id FROM ItemStatusTypes WHERE name='Complete')
+        GROUP BY items.iteration, items.client_name ;
+        
+        
         
 #CREATE VIEW EfficiencyByQA AS SELECT id, name, description FROM LookupTable WHERE lookup_type = 1;
 #CREATE VIEW EfficiencyByResource AS SELECT id, name, description FROM LookupTable WHERE lookup_type = 1;
