@@ -41,7 +41,6 @@ class conf_ApplicationDelegate {
         }		
     }
 	
-	
 	static public $reportMenu = array(
 		  array(
 			'href'=>'index.php?-action=list&-table=items&-edit=1&itemtasks/dev_status=17',
@@ -61,9 +60,17 @@ class conf_ApplicationDelegate {
 		),array(
 			'href'=>'index.php?-action=list&-table=EfficiencyByDeveloperAndIteration',
 			'label'=>'Efficiency By Developer And Iteration'
+		),array(
+			'href'=>'index.php?-action=list&-table=gmcmigrationjobstatus',
+			'label'=>'GMC Migration Job Status'
+		),array(
+			'href'=>'index.php?-action=list&-table=PortfolioJobAllocation',
+			'label'=>'Portfolio-Job Allocation'
+		),array(
+			'href'=>'index.php?-action=list&-table=CompletedItemsCountByClient',
+			'label'=>'Client Composition of Jobs Completed'
 		)
 	);
-	
 	
 	function block__after_nav_menu()
     {
